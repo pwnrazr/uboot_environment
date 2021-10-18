@@ -1,0 +1,42 @@
+baudrate=115200
+#boot_part=boot
+#bootcmd=echo ${devnum}; echo ${prefix}; echo banana; #fatload mmc 1 0x1000000 u-boot.ext; go 0x1000000; #dirty test
+bootdelay=1
+#ethaddr=00:15:18:01:81:31
+
+preboot=usb start
+
+# Init
+bootcmd=run distro_bootcmd
+distro_bootcmd=for target in ${boot_targets}; do run bootcmd_${target}; done
+
+# Addresses
+fdt_addr_r=0x08008000
+fdtoverlay_addr_r=0x01000000
+kernel_addr_r=0x08080000
+kernel_comp_addr_r=0x0d080000
+kernel_comp_size=0x2000000
+loadaddr=0x1000000
+pxefile_addr_r=0x01080000
+ramdisk_addr_r=0x13000000
+scriptaddr=0x08000000
+
+# Bootable device stuff
+boot_prefixes=/ /boot/
+boot_targets=mmc1 mmc2
+boot_syslinux_conf=extlinux/extlinux.conf
+
+# Actual boot based on found device
+boot_extlinux=sysboot ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} ${prefix}${boot_syslinux_conf}
+
+bootcmd_mmc1=devnum=1; run mmc_boot
+bootcmd_mmc2=devnum=2; run mmc_boot
+
+mmc_boot=if mmc dev ${devnum}; then devtype=mmc; run scan_dev_for_boot_part; fi
+
+# Scan for bootable devices
+scan_dev_for_boot=echo Scanning ${devtype} ${devnum}:${distro_bootpart}...; for prefix in ${boot_prefixes}; do run scan_dev_for_extlinux; done;
+scan_dev_for_boot_part=part list ${devtype} ${devnum} -bootable devplist; env exists devplist || setenv devplist 1; for distro_bootpart in ${devplist}; do if fstype ${devtype} ${devnum}:${distro_bootpart} bootfstype; then run scan_dev_for_boot; fi; done; setenv devplist
+scan_dev_for_extlinux=if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}${boot_syslinux_conf}; then echo Found ${prefix}${boot_syslinux_conf}; run boot_extlinux; echo SCRIPT FAILED: continuing...; fi
+
+# ./tools/mkenvimage -s 0x2000 -o mainline_modded_env_OUT.env mainline_modded_env.txt
