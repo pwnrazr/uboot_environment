@@ -39,4 +39,4 @@ scan_dev_for_boot=echo Scanning ${devtype} ${devnum}:${distro_bootpart}...; for 
 scan_dev_for_boot_part=part list ${devtype} ${devnum} -bootable devplist; env exists devplist || setenv devplist 1; for distro_bootpart in ${devplist}; do if fstype ${devtype} ${devnum}:${distro_bootpart} bootfstype; then run scan_dev_for_boot; fi; done; setenv devplist
 scan_dev_for_extlinux=if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}${boot_syslinux_conf}; then echo Found ${prefix}${boot_syslinux_conf}; run boot_extlinux; echo SCRIPT FAILED: continuing...; fi
 
-# ./tools/mkenvimage -s 0x2000 -o mainline_modded_env_OUT.env mainline_modded_env.txt
+# mkenvimage -s 0x2000 -o mainline_modded_env_OUT.env mainline_modded_env.txt
