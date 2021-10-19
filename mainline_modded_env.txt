@@ -45,8 +45,5 @@ scan_dev_for_extlinux=if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefi
 scan_dev_for_scripts=for script in ${boot_scripts}; do if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}${script}; then echo Found U-Boot script ${prefix}${script}; run boot_a_script; echo SCRIPT FAILED: continuing...; fi; done
 scriptaddr=0x08000000
 soc=meson
-stderr=vidconsole,serial
-stdin=usbkbd,serial
-stdout=vidconsole,serial
 usb_boot=usb start; if usb dev ${devnum}; then devtype=usb; run scan_dev_for_boot_part; fi
 vendor=amlogic
